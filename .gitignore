@@ -1,0 +1,9 @@
+elmo/
+GLUE_data/
+models/
+logs/
+
+*.json
+*.pkl
+*.pyc
+
