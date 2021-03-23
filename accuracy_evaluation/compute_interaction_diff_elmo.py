@@ -19,6 +19,7 @@ from truth_interaction_GT_elmo import calculate_shap_sum, get_min_max_shap
 from elmo.elmo_data import _load_shard_cola, _load_shard_sst
 from preprocess import tokenization, extract
 from shapley import *
+from coalition_utils import *
 from build_model import TextModel
 
 resume = False
@@ -128,115 +129,6 @@ def compute_scores_seperate_elmo(positions_dict, embedding, label, predictor):
         # batch_dict = {"input_1": embedding_sample}
         logits = predictor.predict(embedding_sample)
     return logits[:, label], logits_i[:, label]
-
-
-def exclude_mask(position_dict, coal, seg):
-    if isinstance(coal, int):
-        coal = [coal]
-    masks = np.array(position_dict[(0, 0)])
-    masks_i = np.array(position_dict[(0, 1)])
-
-    masks[:, seg[0]:seg[1]] = 0
-    masks_i[:, seg[0]:seg[1]] = 0
-    masks_i[:, coal[0]:coal[-1]+1] = 1
-
-    new_position_dict = {
-        (0, 0): masks,
-        (0, 1): masks_i
-    }
-    return new_position_dict
-
-
-def get_new_list(coalition, clist):
-    """
-    Divide all coalitions into pixels/words except the target coalition
-    :params coalition: the target coalition to compute Shapley value
-    :params clist: coalition list generate from p_ij
-    :return new_list: coalition list where the only coalition is the target coalition
-    """
-    new_list = []
-    pos = -1
-    for j in range(len(clist)):
-        if clist[j] != coalition and isinstance(clist[j], list):
-            new_list.extend(clist[j])
-        elif clist[j] == coalition:
-            pos = len(new_list)
-            new_list.append(clist[j])
-        else:
-            new_list.append(clist[j])
-    return new_list, pos
-
-
-def pij_coals(pij, threshold = 0.5, seg = None):
-    '''
-    threshold: needed to decide coalitions
-    seg: the chosen seg
-    return: a two-dimension list, denoting set of coalitions
-    '''
-    coalitions = []
-    players = [i for i in range(pij.shape[0]+1)]
-    start = 0
-    end = 1
-    while end < len(players):
-        if pij[end-1] > threshold:
-            end += 1
-        else:
-            coalitions.append(players[start:end])
-            start = end
-            end = start+1
-    coalitions.append(players[start:end])
-
-    return coalitions
-
-
-def g_sample_bern(pij):
-    sample_res = np.zeros_like(pij)
-    for i in range(len(pij)):
-        if random.random() < pij[i]:
-            sample_res[i] = 1
-    return sample_res
-
-
-def measure_coalition(g_sample):
-    """
-    :param g_sample: sampled g
-    :return: lambda i
-    """
-    sizes = [1 for i in range(len(g_sample)+1)]
-    l = 0
-    size = 0
-    for i in range(len(g_sample)):
-        if g_sample[i] > 0:
-            size += 1
-        else:
-            for j in range(l,i+1):
-                sizes[j] += size
-            size = 0
-            l = i+1
-    for j in range(l, len(sizes)):
-        sizes[j] += size
-    return sizes
-
-
-def compute_sum(scores_c_s, scores_c_si, g_sample, idx):
-
-    exp = [0.0, 0.0, 0.0, 0.0]
-    if idx > 0 and g_sample[idx-1] > 0:
-        exp[0] += scores_c_si
-        exp[2] += scores_c_s
-    else:
-        exp[1] += scores_c_si
-        exp[3] += scores_c_s
-
-    return exp
-
-
-def cal_overall_exp(score_list):
-    score_list = np.array(score_list)
-    overall_sum = np.sum(score_list, axis=0)
-    overall_count = np.sum(score_list!= 0, axis=0)
-    overall_exp = overall_sum / (overall_count+1e-10)
-    return overall_exp
 
 
 def manage_a_sentence(seg, embedding, label, predictor_model):
