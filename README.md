@@ -28,7 +28,7 @@ The code was tested with python 3.6, Tensorflow 1.14.0, keras 2.3.1, CUDA 10.1 a
 
 ## Data & Model Preparation
 
-Download the pre-processed SST-2 and CoLA dataset as well as the pre-trained BERT and ELMo models [here](https://drive.google.com/drive/folders/1s2uxXOHhGsJvPYIbIMCe09d0Ygs1Qy2-?usp=sharing).
+Download the pre-processed SST-2 and CoLA dataset as well as the pre-trained BERT, ELMo and CNN models [here](https://drive.google.com/drive/folders/1s2uxXOHhGsJvPYIbIMCe09d0Ygs1Qy2-?usp=sharing).
 
 Make sure to put the files in the following structure:
 
