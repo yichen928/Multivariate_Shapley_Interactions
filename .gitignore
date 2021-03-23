@@ -2,6 +2,7 @@ elmo/
 GLUE_data/
 models/
 logs/
+CNN_model/
 
 *.json
 *.pkl
