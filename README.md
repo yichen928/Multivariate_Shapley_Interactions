@@ -11,7 +11,7 @@ The code was tested with python 3.6, Tensorflow 1.14.0, keras 2.3.1, CUDA 10.1 a
 1. Clone the repository:
 
    ```
-   git clone https://github.com/Yichen-Xie/Multivariate_Shapley_Interactions.git
+   git clone https://github.com/yichen928/Multivariate_Shapley_Interactions.git
    ```
 
 2. Install Tensorflow and keras:
